@@ -1,8 +1,16 @@
 import random
 import pickle
 
-class MarkovChain:
 
+def random_numeral():
+    return random.choice(["II", "III", "IV", "V"])
+
+
+def random_greek():
+    return random.choice(["Alpha", "Beta", "Gamma", "Delta", "Epsilon"])
+
+
+class MarkovChain:
     def __init__(self):
         self.chain = {"_start": [], "_end": []}
 
@@ -14,7 +22,7 @@ class MarkovChain:
         sentences = text.lower().split(".")
         for sentence in sentences:
             for word in word_tokenize(sentence):
-                if word not in vocab and word.find('-') < 0:
+                if word not in vocab and word.find("-") < 0 and word.find("_") < 0:
                     self.add_word(word)
 
     def add_word(self, word):
@@ -43,21 +51,25 @@ class MarkovChain:
                 return True
         return False
 
-    def generate_word(self, max_syllables=7):
+    def generate_word(self, max_syllables=5):
         new_word = []
 
-		# Select the first bigram
+        # Select the first bigram
         start_syllable = random.choice(self.chain.get("_start"))
         new_word.append(start_syllable)
 
-	    # Keep looping through the syllables until we
+        # Keep looping through the syllables until we
         # can't come up with another word or each an "end" marker
         prev_syllable = start_syllable
         new_syllable = ""
         num_forks = 0
         while True:
             new_syllables = self.chain.get(prev_syllable)
-            if new_syllables is None or self.roll_dice(len(new_word)) or len(new_word) >= max_syllables:
+            if (
+                new_syllables is None
+                or self.roll_dice(len(new_word))
+                or len(new_word) >= max_syllables
+            ):
                 break
             if len(new_syllables) > 1:
                 num_forks += 1
@@ -69,10 +81,18 @@ class MarkovChain:
 
         return "".join(new_word).capitalize()
 
+    def generate_planet(self, force_numeral=False, force_greek=False, **kwargs):
+        planet = self.generate_word(**kwargs)
+        if force_greek or (len(planet) < 12 and random.randint(0, 100) < 8):
+            planet = random_greek() + " " + planet
+        if force_numeral or random.randint(0, 100) < 8:
+            planet += " " + random_numeral()
+        return planet
+
     def save_to_disk(self, filename):
-        with open(filename, 'wb') as handle:
+        with open(filename, "wb") as handle:
             pickle.dump(self.chain, handle)
 
     def load_from_disk(self, filename):
-        with open(filename, 'rb') as handle:
+        with open(filename, "rb") as handle:
             self.chain = pickle.loads(handle.read())
