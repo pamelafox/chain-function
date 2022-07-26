@@ -81,9 +81,10 @@ class MarkovChain:
 
         return "".join(new_word).capitalize()
 
-    def generate_planet(self, force_numeral=False, force_greek=False, **kwargs):
+    def generate_planet(self, seed=None, force_numeral=False, force_greek=False, **kwargs):
+        random.seed(seed)
         planet = self.generate_word(**kwargs)
-        if force_greek or (len(planet) < 12 and random.randint(0, 100) < 8):
+        if force_greek or (len(planet) <= 12 and random.randint(0, 100) < 10):
             planet = random_greek() + " " + planet
         if force_numeral or random.randint(0, 100) < 8:
             planet += " " + random_numeral()

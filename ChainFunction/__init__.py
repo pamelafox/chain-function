@@ -17,10 +17,11 @@ def get_param(req, param_name):
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     kind = get_param(req, "kind")
+    seed = get_param(req, "seed")
     chain = MarkovChain()
     if kind == "planet":
         chain.load_from_disk("ChainFunction/planet0825_2.pickle")
-        return func.HttpResponse(chain.generate_planet(), status_code=200)
+        return func.HttpResponse(chain.generate_planet(seed), status_code=200)
     elif kind:
         return func.HttpResponse(f"Unknown chain kind: {kind}", status_code=404)
     else:
